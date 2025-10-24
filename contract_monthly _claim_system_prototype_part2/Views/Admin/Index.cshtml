@@ -1,0 +1,41 @@
+﻿
+@model IEnumerable<contract_monthly__claim_system_prototype_part2.Models.Claim>
+<h2>All Claims(Admin)</h2>
+<table>
+	<thead>
+		<tr><th>ID</th><th>Lecturer</th><th>Hours</th><th>Rate</th><th>Notes</th><th>File</th><th>Status</th><th>Action</th></tr>
+	</thead>
+	<tbody>
+		@foreach(var c in Model)
+		{
+		<tr>
+			<td>@c.Id</td>
+			<td>@c.lecturerId</td>
+			<td>@c.HoursWorked</td>
+			<td>@c.HourlyRate</td>
+			<td>@c.Notes</td>
+			<td>@(string.IsNullOrEmpty(c.UploadedFileName) ? "": Html.ActionLink("Download","DownloadFile","Claims",new { file = c.UploadedFileName }, null))</td>
+			<td Id ="status-@c.Id">@c.Status</td>
+			<td>
+				<button class="approve" data-id="@c.Id">Approve</button>
+				<button class="reject" data-id="@c.Id">Reject</button>
+			</td>
+		</tr>
+		}
+	</tbody>
+</table>
+<script src="/lib/signalr/signalr.js"></script>
+<script>
+	const connection = new signalR.HubConnectionBuilder().withUrl('/claimhub?role=admin').build();
+	connection.start();
+
+	document.querySelectorAll('.approve').forEach(b=>b.addEventListener('click', async ()=>{
+		const id =b.getAttribute('data-id');
+		await fetch('/admin/approve/${id}',{method:'POST', headers:{'RequestVerificationToken':'@Html.AntiForgeryToken()'. match (/value="([^"]+)"/)[1] } });
+		document.getElementById('status-'+Id).innerText ='Approved'; }));
+
+	document.querySelectorAll('.reject').forEach(b=>b.addEventListener('click', async ()=>{
+		const id=b.getAttribute('data-id');
+		await fetch('/admin/reject/${id}',{method:'POST', headers:{'RequestVerificationToken':'@Html.AntiForgeryToken()'. match (/value="([^"]+)"/)[1] }});
+		document.getElementById('status-'+Id).innerText ='Rejected'}));
+</script>
